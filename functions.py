@@ -1,113 +1,229 @@
+import numpy as np
+from scipy.integrate import solve_ivp
+
+
+# Create indices
+def set_indices_species():
+    indices = {}
+    index = 0
+    # Create name:index pair for all relevant species
+    indices['ISF_AbM'] = index; index += 1
+    indices['ISF_AbON'] = index; index += 1
+    indices['ISF_AbFN'] = index; index += 1
+    indices['ISF_AbF'] = index; index += 1
+    indices['ISF_AbP'] = index; index += 1
+    indices['ISF_mAb'] = index; index += 1
+    indices['ISF_AbF_mAb'] = index; index += 1
+    indices['ISF_AbM_mAb'] = index; index += 1
+    indices['ISF_AbFN1'] = index; index += 1
+    indices['ISF_AbF1'] = index; index += 1
+    indices['ISF_AbFN2'] = index; index += 1
+    indices['ISF_AbF2'] = index; index += 1
+    
+    # PL
+    indices['PL_AbM'] = index; index += 1
+    indices['PL_mAb'] = index; index += 1
+    indices['PL_AbM_mAb'] = index; index += 1
+   
+    # CSF
+    indices['CSF_AbM'] = index; index += 1
+    indices['CSF_mAb'] = index; index += 1
+    indices['CSF_AbM_mAb'] = index; index += 1
+    
+    # PE
+    indices['PE_mAb'] = index; index += 1
+
+    return [indices, index]
+
+indices_species, num_species = set_indices_species()
+
+#############################################################
+def set_indices_parameters():
+    indices = {}
+    index = 0
+    
+    # Commonly used constants
+    indices['m0'] = index; index += 1
+    indices['t0'] = index; index += 1
+    indices['week_to_hour'] = index; index += 1
+    indices['year_to_week'] = index; index += 1
+    
+    # Plasma volume
+    indices['V_PL'] = index; index += 1
+    # Aducanumab molecular weight 
+    indices['MW_aducanumab'] = index; index += 1
+    # A normal person's weight 
+    indices['W_normal'] = index; index += 1
+
+    # Parameter values 
+    
+    # Abeta production, aggregation
+    indices['k_ISF_AbM_syn'] = index; index += 1
+
+    indices['n_ISF_AbO_1stNuc'] = index; index += 1
+    indices['k_ISF_AbO_1stNuc'] = index; index += 1
+    indices['n_ISF_AbO = 2'] = index; index += 1
+    indices['k_ISF_AbO_diss'] = index; index += 1
+    indices['n_ISF_AbF_conv'] = index; index += 1
+    indices['k_ISF_AbF_conv'] = index; index += 1
+    indices['k_ISF_AbF_on'] = index; index += 1
+    indices['n_ISF_AbO_2ndNuc'] = index; index += 1
+    indices['k_ISF_AbO_2ndNuc'] = index; index += 1  
+    indices['k_ISF_AbP_conv'] = index; index += 1
+    indices['k_ISF_AbP_diss'] = index; index += 1
+    
+    # Clearace
+    # ISF
+    indices['k_ISF_AbM_clear'] = index; index += 1
+    indices['k_ISF_AbF_clear'] = index; index += 1
+    indices['k_ISF_AbP_clear'] = index; index += 1
+    indices['k_ISF_mAb_clear'] = index; index += 1
+    indices['k_ISF_AbF_mAb_clear'] = index; index += 1
+    indices['k_ISF_AbM_mAb_clear'] = index; index += 1   
+    indices['k_ISF_AbFN1_clear'] = index; index += 1    
+    indices['k_ISF_AbF1_clear'] = index; index += 1    
+    indices['k_ISF_AbFN2_clear'] = index; index += 1    
+    indices['k_ISF_AbF2_clear'] = index; index += 1
+    
+    # PL
+    indices['k_PL_AbM_clear'] = index; index += 1    
+    indices['k_PL_mAb_clear'] = index; index += 1    
+    indices['k_PL_AbM_mAb_clear'] = index; index += 1
+    
+    # Transportation
+    # Monomer
+    indices['k_ISF_CSF_AbM_tran'] = index; index += 1
+    indices['k_ISF_PL_AbM_tran'] = index; index += 1
+    indices['k_PL_ISF_AbM_tran'] = index; index += 1    
+    indices['k_CSF_PL_AbM_tran'] = index; index += 1    
+    indices['k_PL_CSF_AbM_tran'] = index; index += 1
+    
+    
+    # Antibody
+    indices['k_ISF_PL_mAb_tran'] = index; index += 1    
+    indices['k_PL_ISF_mAb_tran'] = index; index += 1    
+    indices['k_ISF_CSF_mAb_tran'] = index; index += 1    
+    indices['k_CSF_PL_mAb_tran'] = index; index += 1    
+    indices['k_PL_CSF_mAb_tran'] = index; index += 1    
+    indices['k_PL_PE_mAb_tran'] = index; index += 1    
+    indices['k_PE_PL_mAb_tran'] = index; index += 1
+    
+    
+    # Monomer-antibody
+    indices['k_ISF_PL_AbM_mAb_tran'] = index; index += 1
+    indices['k_PL_ISF_AbM_mAb_tran'] = index; index += 1
+    indices['k_ISF_CSF_AbM_mAb_tran'] = index; index += 1
+    indices['k_CSF_PL_AbM_mAb_tran'] = index; index += 1
+    indices['k_PL_CSF_AbM_mAb_tran'] = index; index += 1
+    
+    # Binding and unbinding
+    indices['k_ISF_AbF_mAb_bind'] = index; index += 1
+    indices['k_ISF_AbF_mAb_diss'] = index; index += 1
+    
+
+    # Monomer-antibody 
+    indices['k_ISF_AbM_mAb_bind'] = index; index += 1
+    indices['k_ISF_AbM_mAb_diss'] = index; index += 1        
+    indices['k_CSF_AbM_mAb_bind'] = index; index += 1    
+    indices['k_CSF_AbM_mAb_diss'] = index; index += 1    
+    indices['k_PL_AbM_mAb_bind'] = index; index += 1    
+    indices['k_PL_AbM_mAb_diss'] = index; index += 1
+    
+    # Fibril end-antibody
+    indices['k_ISF_AbFN_mAb_bind'] = index; index += 1
+    indices['k_ISF_AbFN_mAb_diss'] = index; index += 1
+    
+    # ISF antibody 'production' rate
+    indices['k_ISF_mAb_syn'] = index; index += 1
+        
+    return indices
+
+
 ###################################################################################
-# Right-hand sides of all equations
 def RHS(t, y):
     
     # rhs stores all the righ-hand sides to be returned
-    rhs = []
+    rhs = np.zeros(num_species)
     # index of a variable
     index = 0
     
     ## Variables
     
+    idx = indices_species
+    
     # ISF
-    ISF_AbM = y[index]; index += 1    
-    ISF_AbON = y[index]; index += 1
-    ISF_AbFN = y[index]; index += 1
-    ISF_AbF = y[index]; index += 1
-    ISF_AbP = y[index]; index += 1
-    ISF_mAb = y[index]; index += 1
-    ISF_AbF_mAb = y[index]; index += 1
-    ISF_AbM_mAb = y[index]; index += 1
-    ISF_AbFN1 = y[index]; index += 1 # one antibody bound to a fibril end
-    ISF_AbF1 = y[index]; index += 1 
-    ISF_AbFN2 = y[index]; index += 1 # two antibody bound to two fibril ends
-    ISF_AbF2 = y[index]; index += 1 
+    ISF_AbM = y[idx['ISF_AbM']]
+    ISF_AbON = y[idx['ISF_AbON']]; 
+    ISF_AbFN = y[idx['ISF_AbFN']]; 
+    ISF_AbF = y[idx['ISF_AbF']]; 
+    ISF_AbP = y[idx['ISF_AbP']]; 
+    ISF_mAb = y[idx['ISF_mAb']]; 
+    ISF_AbF_mAb = y[idx['ISF_AbF_mAb']]; 
+    ISF_AbM_mAb = y[idx['ISF_AbM_mAb']]; 
+    ISF_AbFN1 = y[idx['ISF_AbFN1']];  # one antibody bound to a fibril end
+    ISF_AbF1 = y[idx['ISF_AbF1']]; 
+    ISF_AbFN2 = y[idx['ISF_AbFN2']];  # two antibody bound to two fibril ends
+    ISF_AbF2 = y[idx['ISF_AbF2']]; 
     
     ISF_AbFN_total = ISF_AbFN + ISF_AbFN1 + ISF_AbFN2
     ISF_AbF_total = ISF_AbF + ISF_AbF1 + ISF_AbF2
     
     
     # PL
-    PL_AbM = y[index]; index += 1  
-    PL_mAb = y[index]; index += 1    
-    PL_AbM_mAb = y[index]; index += 1    
+    PL_AbM = y[idx['PL_AbM']]; 
+    PL_mAb = y[idx['PL_mAb']]; 
+    PL_AbM_mAb = y[idx['PL_AbM_mAb']];  
     
     
     # CSF
-    CSF_AbM = y[index]; index += 1    
-    CSF_mAb = y[index]; index += 1  
-    CSF_AbM_mAb = y[index]; index += 1  
+    CSF_AbM = y[idx['CSF_AbM']];     
+    CSF_mAb = y[idx['CSF_mAb']]; 
+    CSF_AbM_mAb = y[idx['CSF_AbM_mAb']]; 
     
     # PE
-    PE_mAb = y[index]; index += 1    
+    PE_mAb = y[idx['PE_mAb']]; 
     
     
     
-    ## Derivatives
-    
-    # ISF
-    d_ISF_AbM_dt = 0
-    d_ISF_AbON_dt = 0 
-    d_ISF_AbFN_dt = 0 
-    d_ISF_AbF_dt = 0
-    d_ISF_AbP_dt = 0 
-    d_ISF_mAb_dt = 0
-    d_ISF_AbF_mAb_dt = 0
-    d_ISF_AbM_mAb_dt = 0
-    d_ISF_AbFN1_dt = 0
-    d_ISF_AbF1_dt = 0
-    d_ISF_AbFN2_dt = 0
-    d_ISF_AbF2_dt = 0 
-    # PL
-    d_PL_AbM_dt = 0   
-    d_PL_mAb_dt = 0
-    d_PL_AbM_mAb_dt = 0
-    # CSF
-    d_CSF_AbM_dt = 0   
-    d_CSF_mAb_dt = 0
-    d_CSF_AbM_mAb_dt = 0
-    # PE
-    d_PE_mAb_dt = 0
-    
-    
+    p = parameters
     
     
     ## Calculating the right-hand sides
 
     # ISF
     # AbM production
-    d_ISF_AbM_dt += k_ISF_AbM_syn
+    rhs[idx['ISF_AbM']] += p['k_ISF_AbM_syn']
     # Primary nucleation
-    d_ISF_AbM_dt += -k_ISF_AbO_1stNuc * (ISF_AbM**n_ISF_AbO_1stNuc) * n_ISF_AbO
-    d_ISF_AbON_dt += k_ISF_AbO_1stNuc * (ISF_AbM**n_ISF_AbO_1stNuc)
+    rhs[idx['ISF_AbM']] += - p['k_ISF_AbO_1stNuc'] * (ISF_AbM**p['n_ISF_AbO_1stNuc']) * p['n_ISF_AbO']
+    rhs[idx['ISF_AbON']] += p['k_ISF_AbO_1stNuc'] * (ISF_AbM**p['n_ISF_AbO_1stNuc'])
     # Oligomer dissociation
-    d_ISF_AbON_dt += -k_ISF_AbO_diss * ISF_AbON
-    d_ISF_AbM_dt += k_ISF_AbO_diss * ISF_AbON * n_ISF_AbO
+    rhs[idx['ISF_AbON']] += - p['k_ISF_AbO_diss'] * ISF_AbON
+    rhs[idx['ISF_AbM']] += p['k_ISF_AbO_diss'] * ISF_AbON * p['n_ISF_AbO']
     # Oligomer conversion into fibril
-    d_ISF_AbON_dt += -k_ISF_AbF_conv * ISF_AbON * (ISF_AbM**n_ISF_AbF_conv)
-    d_ISF_AbFN_dt += k_ISF_AbF_conv * ISF_AbON * (ISF_AbM**n_ISF_AbF_conv)
-    d_ISF_AbF_dt += k_ISF_AbF_conv * ISF_AbON * (ISF_AbM**n_ISF_AbF_conv) * n_ISF_AbO
+    rhs[idx['ISF_AbON']] += - p['k_ISF_AbF_conv'] * ISF_AbON * (ISF_AbM**p['n_ISF_AbF_conv'])
+    rhs[idx['ISF_AbFN']] += p['k_ISF_AbF_conv'] * ISF_AbON * (ISF_AbM**p['n_ISF_AbF_conv'])
+    rhs[idx['ISF_AbF']] += p['k_ISF_AbF_conv'] * ISF_AbON * (ISF_AbM**p['n_ISF_AbF_conv']) * p['n_ISF_AbO']
     # Fibril elongation
-    d_ISF_AbF_dt += 2 * k_ISF_AbF_on * ISF_AbM * ISF_AbFN
-    d_ISF_AbM_dt += -2 * k_ISF_AbF_on * ISF_AbM * ISF_AbFN
-    d_ISF_AbF1_dt += k_ISF_AbF_on * ISF_AbM * ISF_AbFN1
-    d_ISF_AbM_dt += -k_ISF_AbF_on * ISF_AbM * ISF_AbFN1
+    rhs[idx['ISF_AbF']] += 2 * p['k_ISF_AbF_on'] * ISF_AbM * ISF_AbFN
+    rhs[idx['ISF_AbM']] += - 2 * p['k_ISF_AbF_on'] * ISF_AbM * ISF_AbFN
+    rhs[idx['ISF_AbF1']] += p['k_ISF_AbF_on'] * ISF_AbM * ISF_AbFN1
+    rhs[idx['ISF_AbM']] += - p['k_ISF_AbF_on'] * ISF_AbM * ISF_AbFN1
     # Secondary nucleation
-    d_ISF_AbM_dt += -k_ISF_AbO_2ndNuc * (ISF_AbM**n_ISF_AbO_2ndNuc) * ISF_AbF_total * n_ISF_AbO
-    d_ISF_AbON_dt += k_ISF_AbO_2ndNuc * (ISF_AbM**n_ISF_AbO_2ndNuc) * ISF_AbF_total
+    rhs[idx['ISF_AbM']] += -p['k_ISF_AbO_2ndNuc'] * (ISF_AbM**p['n_ISF_AbO_2ndNuc']) * ISF_AbF_total * p['n_ISF_AbO']
+    rhs[idx['ISF_AbON']] += p['k_ISF_AbO_2ndNuc'] * (ISF_AbM**p['n_ISF_AbO_2ndNuc']) * ISF_AbF_total
     # Fibril conversion into plaque
-    d_ISF_AbFN_dt += -k_ISF_AbP_conv * ISF_AbFN
-    d_ISF_AbF_dt += -k_ISF_AbP_conv * ISF_AbF
-    d_ISF_AbP_dt += k_ISF_AbP_conv * ISF_AbF
-    d_ISF_AbFN1_dt += -k_ISF_AbP_conv * ISF_AbFN1 # Fibril end binding might affect plaque formation
-    d_ISF_AbF1_dt += -k_ISF_AbP_conv * ISF_AbF1
-    d_ISF_AbP_dt += k_ISF_AbP_conv * ISF_AbF1
-    d_ISF_AbFN2_dt += -k_ISF_AbP_conv * ISF_AbFN2
-    d_ISF_AbF2_dt += -k_ISF_AbP_conv * ISF_AbF2
-    d_ISF_AbP_dt += k_ISF_AbP_conv * ISF_AbF2
-    # Plaque dissociation into monomer
-    d_ISF_AbM_dt += k_ISF_AbP_diss * ISF_AbP
-    d_ISF_AbP_dt += -k_ISF_AbP_diss * ISF_AbP
+    rhs[idx['ISF_AbFN']] += - p['k_ISF_AbP_conv'] * ISF_AbFN   
+    rhs[idx['ISF_AbF']] += - p['k_ISF_AbP_conv'] * ISF_AbF   
+    rhs[idx['ISF_AbP']] += p['k_ISF_AbP_conv'] * ISF_AbF    
+    rhs[idx['ISF_AbFN1']] += - p['k_ISF_AbP_conv'] * ISF_AbFN1 # Fibril end binding might affect plaque formation    
+    rhs[idx['ISF_AbF1']] += - p['k_ISF_AbP_conv'] * ISF_AbF1    
+    rhs[idx['ISF_AbP']] += p['k_ISF_AbP_conv'] * ISF_AbF1    
+    rhs[idx['ISF_AbFN2']] += - p['k_ISF_AbP_conv'] * ISF_AbFN2   
+    rhs[idx['ISF_AbF2']] += - p['k_ISF_AbP_conv'] * ISF_AbF2   
+    rhs[idx['ISF_AbP']] += p['k_ISF_AbP_conv'] * ISF_AbF2
+    # Plaque dissociation into monomer    
+    rhs[idx['ISF_AbM']] += p['k_ISF_AbP_diss'] * ISF_AbP    
+    rhs[idx['ISF_AbP']] += - p['k_ISF_AbP_diss'] * ISF_AbP
     
     
     
@@ -115,200 +231,173 @@ def RHS(t, y):
     
     # ISF
     # Monomer clearance
-    d_ISF_AbM_dt += -k_ISF_AbM_clear * ISF_AbM
-    # Fibril clearance
-    d_ISF_AbF_dt += -k_ISF_AbF_clear * ISF_AbF
-    d_ISF_AbFN_dt += -k_ISF_AbF_clear * ISF_AbFN
-    # Plaque clearance
-    d_ISF_AbP_dt += -k_ISF_AbP_clear * ISF_AbP
-    # Antibody clearance
-    d_ISF_mAb_dt += -k_ISF_mAb_clear * ISF_mAb # No such clearance in both Lin and Madrasi
-    # Monomer-antibody clearance
-    d_ISF_AbM_mAb_dt += -k_ISF_AbM_mAb_clear * ISF_AbM_mAb
-    # Fibril surface-antibody clearance
-    d_ISF_AbF_mAb_dt += -k_ISF_AbF_mAb_clear * ISF_AbF_mAb
-    # Fibril end-entibody clearance
-    d_ISF_AbFN1_dt += -k_ISF_AbFN1_clear * ISF_AbFN1
-    d_ISF_AbF1_dt += -k_ISF_AbF1_clear * ISF_AbF1
-    d_ISF_AbFN2_dt += -k_ISF_AbFN2_clear * ISF_AbFN2
-    d_ISF_AbF2_dt += -k_ISF_AbF2_clear * ISF_AbF2
-    
+    rhs[idx['ISF_AbM']] += - p['k_ISF_AbM_clear'] * ISF_AbM
+    # Fibril clearance    
+    rhs[idx['ISF_AbF']] += - p['k_ISF_AbF_clear'] * ISF_AbF    
+    rhs[idx['ISF_AbFN']] += - p['k_ISF_AbF_clear'] * ISF_AbFN
+    # Plaque clearance    
+    rhs[idx['ISF_AbP']] += - p['k_ISF_AbP_clear'] * ISF_AbP
+    # Antibody clearance    
+    rhs[idx['ISF_mAb']] += - p['k_ISF_mAb_clear'] * ISF_mAb # No such clearance in both Lin and Madrasi
+    # Monomer-antibody clearance    
+    rhs[idx['ISF_AbM_mAb']] += -p['k_ISF_AbM_mAb_clear'] * ISF_AbM_mAb
+    # Fibril surface-antibody clearance    
+    rhs[idx['ISF_AbF_mAb']] += -p['k_ISF_AbF_mAb_clear'] * ISF_AbF_mAb
+    # Fibril end-antibody clearance   
+    rhs[idx['ISF_AbFN1']] += -p['k_ISF_AbFN1_clear'] * ISF_AbFN1    
+    rhs[idx['ISF_AbF1']] += -p['k_ISF_AbF1_clear'] * ISF_AbF1
+    rhs[idx['ISF_AbFN2']] += -p['k_ISF_AbFN2_clear'] * ISF_AbFN2    
+    rhs[idx['ISF_AbF2']] += -p['k_ISF_AbF2_clear'] * ISF_AbF2
     
     # PL
     # Monomer clearance
-    d_PL_AbM_dt += -k_PL_AbM_clear * PL_AbM
-    # Antibody clearance 
-    d_PL_mAb_dt += -k_PL_mAb_clear * PL_mAb
-    # Monomer-antibody clearance
-    d_PL_AbM_mAb_dt += -k_PL_AbM_mAb_clear * PL_AbM_mAb
-    
+    rhs[idx['PL_AbM']] += -p['k_PL_AbM_clear'] * PL_AbM
+    # Antibody clearance    
+    rhs[idx['PL_mAb']] += -p['k_PL_mAb_clear'] * PL_mAb
+    # Monomer-antibody clearance    
+    rhs[idx['PL_AbM_mAb']] += -p['k_PL_AbM_mAb_clear'] * PL_AbM_mAb
     
     
     # Abeta monomer transportation
-    # ISF -> CSF
-    d_ISF_AbM_dt += -k_ISF_CSF_AbM_tran * ISF_AbM
-    d_CSF_AbM_dt += k_ISF_CSF_AbM_tran * ISF_AbM
+    # ISF -> CSF   
+    rhs[idx['ISF_AbM']] += -p['k_ISF_CSF_AbM_tran'] * ISF_AbM   
+    rhs[idx['CSF_AbM']] += p['k_ISF_CSF_AbM_tran'] * ISF_AbM
     # ISF -> PL
-    d_ISF_AbM_dt += -k_ISF_PL_AbM_tran * ISF_AbM
-    d_PL_AbM_dt +=k_ISF_PL_AbM_tran * ISF_AbM
-    # PL -> ISF
-    d_ISF_AbM_dt += k_PL_ISF_AbM_tran * PL_AbM
-    d_PL_AbM_dt += -k_PL_ISF_AbM_tran * PL_AbM
+    rhs[idx['ISF_AbM']] += -p['k_ISF_PL_AbM_tran'] * ISF_AbM
+    rhs[idx['PL_AbM']] +=p['k_ISF_PL_AbM_tran'] * ISF_AbM
+    # PL -> ISF    
+    rhs[idx['ISF_AbM']] += p['k_PL_ISF_AbM_tran'] * PL_AbM    
+    rhs[idx['PL_AbM']] += -p['k_PL_ISF_AbM_tran'] * PL_AbM
     # CSF -> PL
-    d_CSF_AbM_dt += -k_CSF_PL_AbM_tran * CSF_AbM
-    d_PL_AbM_dt += k_CSF_PL_AbM_tran * CSF_AbM
-    # PL -> CSF
-    d_CSF_AbM_dt += k_PL_CSF_AbM_tran * PL_AbM
-    d_PL_AbM_dt += -k_PL_CSF_AbM_tran * PL_AbM
+    rhs[idx['CSF_AbM']] += -p['k_CSF_PL_AbM_tran'] * CSF_AbM
+    rhs[idx['PL_AbM']] += p['k_CSF_PL_AbM_tran'] * CSF_AbM
+    # PL -> CSF    
+    rhs[idx['CSF_AbM']] += p['k_PL_CSF_AbM_tran'] * PL_AbM    
+    rhs[idx['PL_AbM']] += -p['k_PL_CSF_AbM_tran'] * PL_AbM
     
     
     
     # Antibody transportation
-    # ISF -> PL
-    d_ISF_mAb_dt += -k_ISF_PL_mAb_tran * ISF_mAb
-    d_PL_mAb_dt += k_ISF_PL_mAb_tran * ISF_mAb
+    # ISF -> PL    
+    rhs[idx['ISF_mAb']] += -p['k_ISF_PL_mAb_tran'] * ISF_mAb   
+    rhs[idx['PL_mAb']] += p['k_ISF_PL_mAb_tran'] * ISF_mAb
     # PL -> ISF
-    d_ISF_mAb_dt += k_PL_ISF_mAb_tran * PL_mAb
-    d_PL_mAb_dt += -k_PL_ISF_mAb_tran * PL_mAb
+    rhs[idx['ISF_mAb']] += p['k_PL_ISF_mAb_tran'] * PL_mAb   
+    rhs[idx['PL_mAb']] += -p['k_PL_ISF_mAb_tran'] * PL_mAb
     # ISF -> CSF
-    d_ISF_mAb_dt += -k_ISF_CSF_mAb_tran * ISF_mAb
-    d_CSF_mAb_dt += k_ISF_CSF_mAb_tran * ISF_mAb
-    # CSF -> PL
-    d_CSF_mAb_dt += -k_CSF_PL_mAb_tran * CSF_mAb
-    d_PL_mAb_dt += k_CSF_PL_mAb_tran * CSF_mAb
+    rhs[idx['ISF_mAb']] += -p['k_ISF_CSF_mAb_tran'] * ISF_mAb
+    rhs[idx['CSF_mAb']] += p['k_ISF_CSF_mAb_tran'] * ISF_mAb
+    # CSF -> PL   
+    rhs[idx['CSF_mAb']] += -p['k_CSF_PL_mAb_tran'] * CSF_mAb  
+    rhs[idx['PL_mAb']] += p['k_CSF_PL_mAb_tran'] * CSF_mAb
     # PL -> CSF
-    d_CSF_mAb_dt += k_PL_CSF_mAb_tran * PL_mAb
-    d_PL_mAb_dt += -k_PL_CSF_mAb_tran * PL_mAb
+    rhs[idx['CSF_mAb']] += p['k_PL_CSF_mAb_tran'] * PL_mAb
+    rhs[idx['PL_mAb']] += -p['k_PL_CSF_mAb_tran'] * PL_mAb
     # PL -> PE
-    d_PL_mAb_dt += -k_PL_PE_mAb_tran * PL_mAb
-    d_PE_mAb_dt += k_PL_PE_mAb_tran * PL_mAb
+    rhs[idx['PL_mAb']] += -p['k_PL_PE_mAb_tran'] * PL_mAb
+    rhs[idx['PE_mAb']] += p['k_PL_PE_mAb_tran'] * PL_mAb
     # PE -> PL
-    d_PL_mAb_dt += k_PE_PL_mAb_tran * PE_mAb
-    d_PE_mAb_dt += -k_PE_PL_mAb_tran * PE_mAb
-    
+    rhs[idx['PL_mAb']] += p['k_PE_PL_mAb_tran'] * PE_mAb
+    rhs[idx['PE_mAb']] += -p['k_PE_PL_mAb_tran'] * PE_mAb
     
     
     # mAb-AbM transportation
-    # ISF->PL
-    d_ISF_AbM_mAb_dt += -k_ISF_PL_AbM_mAb_tran * ISF_AbM_mAb
-    d_PL_AbM_mAb_dt += k_ISF_PL_AbM_mAb_tran * ISF_AbM_mAb
+    # ISF->PL 
+    rhs[idx['ISF_AbM_mAb']] += -p['k_ISF_PL_AbM_mAb_tran'] * ISF_AbM_mAb
+    rhs[idx['PL_AbM_mAb']] += p['k_ISF_PL_AbM_mAb_tran'] * ISF_AbM_mAb
     # PL->ISF
-    d_ISF_AbM_mAb_dt += k_PL_ISF_AbM_mAb_tran * PL_AbM_mAb
-    d_PL_AbM_mAb_dt += -k_PL_ISF_AbM_mAb_tran * PL_AbM_mAb
+    rhs[idx['ISF_AbM_mAb']] += p['k_PL_ISF_AbM_mAb_tran'] * PL_AbM_mAb
+    rhs[idx['PL_AbM_mAb']] += -p['k_PL_ISF_AbM_mAb_tran'] * PL_AbM_mAb
     # ISF->CSF
-    d_ISF_AbM_mAb_dt += -k_ISF_CSF_AbM_mAb_tran * ISF_AbM_mAb
-    d_CSF_AbM_mAb_dt += k_ISF_CSF_AbM_mAb_tran * ISF_AbM_mAb
+    rhs[idx['ISF_AbM_mAb']] += -p['k_ISF_CSF_AbM_mAb_tran'] * ISF_AbM_mAb
+    rhs[idx['CSF_AbM_mAb']] += p['k_ISF_CSF_AbM_mAb_tran'] * ISF_AbM_mAb
     # CSF->PL
-    d_CSF_AbM_mAb_dt += -k_CSF_PL_AbM_mAb_tran * CSF_AbM_mAb
-    d_PL_AbM_mAb_dt += k_CSF_PL_AbM_mAb_tran * CSF_AbM_mAb
+    rhs[idx['CSF_AbM_mAb']] += -p['k_CSF_PL_AbM_mAb_tran'] * CSF_AbM_mAb
+    rhs[idx['PL_AbM_mAb']] += p['k_CSF_PL_AbM_mAb_tran'] * CSF_AbM_mAb
     # PL->CSF
-    d_CSF_AbM_mAb_dt += k_PL_CSF_AbM_mAb_tran * PL_AbM_mAb
-    d_PL_AbM_mAb_dt += -k_PL_CSF_AbM_mAb_tran * PL_AbM_mAb
+    rhs[idx['CSF_AbM_mAb']] += p['k_PL_CSF_AbM_mAb_tran'] * PL_AbM_mAb
+    rhs[idx['PL_AbM_mAb']] += -p['k_PL_CSF_AbM_mAb_tran'] * PL_AbM_mAb
     
     
     # Antibody AbF binding unbinding
     # ISF 
-    # Fibril binding
-    d_ISF_AbF_dt += -k_ISF_AbF_mAb_bind * ISF_AbF * ISF_mAb
-    d_ISF_mAb_dt += -k_ISF_AbF_mAb_bind * ISF_AbF * ISF_mAb
-    d_ISF_AbF_mAb_dt += k_ISF_AbF_mAb_bind * ISF_AbF * ISF_mAb
-    # AbF-mAb unbinding
-    d_ISF_AbF_dt += k_ISF_AbF_mAb_diss * ISF_AbF_mAb
-    d_ISF_mAb_dt += k_ISF_AbF_mAb_diss * ISF_AbF_mAb
-    d_ISF_AbF_mAb_dt += -k_ISF_AbF_mAb_diss * ISF_AbF_mAb
+    # Fibril binding    
+    rhs[idx['ISF_AbF']] += -p['k_ISF_AbF_mAb_bind'] * ISF_AbF * ISF_mAb    
+    rhs[idx['ISF_mAb']] += -p['k_ISF_AbF_mAb_bind'] * ISF_AbF * ISF_mAb    
+    rhs[idx['ISF_AbF_mAb']] += p['k_ISF_AbF_mAb_bind'] * ISF_AbF * ISF_mAb
+    # AbF-mAb unbinding   
+    rhs[idx['ISF_AbF']] += p['k_ISF_AbF_mAb_diss'] * ISF_AbF_mAb   
+    rhs[idx['ISF_mAb']] += p['k_ISF_AbF_mAb_diss'] * ISF_AbF_mAb   
+    rhs[idx['ISF_AbF_mAb']] += -p['k_ISF_AbF_mAb_diss'] * ISF_AbF_mAb
     
     
     # Antibody AbM binding unbinding
     
     # ISF
     # Binding
-    d_ISF_AbM_dt += -k_ISF_AbM_mAb_bind * ISF_AbM * ISF_mAb
-    d_ISF_mAb_dt += -k_ISF_AbM_mAb_bind * ISF_AbM * ISF_mAb
-    d_ISF_AbM_mAb_dt += k_ISF_AbM_mAb_bind * ISF_AbM * ISF_mAb
+    rhs[idx['ISF_AbM']] += -p['k_ISF_AbM_mAb_bind'] * ISF_AbM * ISF_mAb
+    rhs[idx['ISF_mAb']] += -p['k_ISF_AbM_mAb_bind'] * ISF_AbM * ISF_mAb
+    rhs[idx['ISF_AbM_mAb']] += p['k_ISF_AbM_mAb_bind'] * ISF_AbM * ISF_mAb
     # Unbinding
-    d_ISF_AbM_dt += k_ISF_AbM_mAb_diss * ISF_AbM_mAb
-    d_ISF_mAb_dt += k_ISF_AbM_mAb_diss * ISF_AbM_mAb
-    d_ISF_AbM_mAb_dt += -k_ISF_AbM_mAb_diss * ISF_AbM_mAb
+    rhs[idx['ISF_AbM']] += p['k_ISF_AbM_mAb_diss'] * ISF_AbM_mAb
+    rhs[idx['ISF_mAb']] += p['k_ISF_AbM_mAb_diss'] * ISF_AbM_mAb
+    rhs[idx['ISF_AbM_mAb']] += -p['k_ISF_AbM_mAb_diss'] * ISF_AbM_mAb
     
     # CSF
     # binding
-    d_CSF_AbM_dt += -k_CSF_AbM_mAb_bind * CSF_AbM * CSF_mAb
-    d_CSF_mAb_dt += -k_CSF_AbM_mAb_bind * CSF_AbM * CSF_mAb
-    d_CSF_AbM_mAb_dt += k_CSF_AbM_mAb_bind * CSF_AbM * CSF_mAb
+    rhs[idx['CSF_AbM']] += -p['k_CSF_AbM_mAb_bind'] * CSF_AbM * CSF_mAb
+    rhs[idx['CSF_mAb']] += -p['k_CSF_AbM_mAb_bind'] * CSF_AbM * CSF_mAb
+    rhs[idx['CSF_AbM_mAb']] += p['k_CSF_AbM_mAb_bind'] * CSF_AbM * CSF_mAb
     # unbinding
-    d_CSF_AbM_dt += k_CSF_AbM_mAb_diss * CSF_AbM_mAb
-    d_CSF_mAb_dt += k_CSF_AbM_mAb_diss * CSF_AbM_mAb
-    d_CSF_AbM_mAb_dt += -k_CSF_AbM_mAb_diss * CSF_AbM_mAb
+    rhs[idx['CSF_AbM']] += p['k_CSF_AbM_mAb_diss'] * CSF_AbM_mAb
+    rhs[idx['CSF_mAb']] += p['k_CSF_AbM_mAb_diss'] * CSF_AbM_mAb
+    rhs[idx['CSF_AbM_mAb']] += -p['k_CSF_AbM_mAb_diss'] * CSF_AbM_mAb
     
     # PL
     # binding
-    d_PL_AbM_dt += -k_PL_AbM_mAb_bind * PL_AbM * PL_mAb
-    d_PL_mAb_dt += -k_PL_AbM_mAb_bind * PL_AbM * PL_mAb
-    d_PL_AbM_mAb_dt += k_PL_AbM_mAb_bind * PL_AbM * PL_mAb
+    rhs[idx['PL_AbM']] += -p['k_PL_AbM_mAb_bind'] * PL_AbM * PL_mAb
+    rhs[idx['PL_mAb']] += -p['k_PL_AbM_mAb_bind'] * PL_AbM * PL_mAb
+    rhs[idx['PL_AbM_mAb']] += p['k_PL_AbM_mAb_bind'] * PL_AbM * PL_mAb
     # unbinding
-    d_PL_AbM_dt += k_PL_AbM_mAb_diss * PL_AbM_mAb
-    d_PL_mAb_dt += k_PL_AbM_mAb_diss * PL_AbM_mAb
-    d_PL_AbM_mAb_dt += -k_PL_AbM_mAb_diss * PL_AbM_mAb
+    rhs[idx['PL_AbM']] += p['k_PL_AbM_mAb_diss'] * PL_AbM_mAb
+    rhs[idx['PL_mAb']] += p['k_PL_AbM_mAb_diss'] * PL_AbM_mAb
+    rhs[idx['PL_AbM_mAb']] += -p['k_PL_AbM_mAb_diss'] * PL_AbM_mAb
     
     
     
     # AbFN mAb binding (fibril end binding), clearance
     # ISF
     # FN->FN1
-    d_ISF_AbFN_dt += -2 * k_ISF_AbFN_mAb_bind * ISF_AbFN * ISF_mAb
-    d_ISF_AbFN1_dt += 2 * k_ISF_AbFN_mAb_bind * ISF_AbFN * ISF_mAb
-    d_ISF_mAb_dt += -2 * k_ISF_AbFN_mAb_bind * ISF_AbFN * ISF_mAb
-    d_ISF_AbF_dt += -2 * k_ISF_AbFN_mAb_bind * ISF_AbF * ISF_mAb
-    d_ISF_AbF1_dt += 2 * k_ISF_AbFN_mAb_bind * ISF_AbF * ISF_mAb
+    rhs[idx['ISF_AbFN']] += -2 * p['k_ISF_AbFN_mAb_bind'] * ISF_AbFN * ISF_mAb
+    rhs[idx['ISF_AbFN1']] += 2 * p['k_ISF_AbFN_mAb_bind'] * ISF_AbFN * ISF_mAb
+    rhs[idx['ISF_mAb']] += -2 * p['k_ISF_AbFN_mAb_bind'] * ISF_AbFN * ISF_mAb
+    rhs[idx['ISF_AbF']] += -2 * p['k_ISF_AbFN_mAb_bind'] * ISF_AbF * ISF_mAb
+    rhs[idx['ISF_AbF1']] += 2 * p['k_ISF_AbFN_mAb_bind'] * ISF_AbF * ISF_mAb
     # FN1->FN
-    d_ISF_AbFN_dt += k_ISF_AbFN_mAb_diss * ISF_AbFN1
-    d_ISF_AbFN1_dt += -k_ISF_AbFN_mAb_diss * ISF_AbFN1
-    d_ISF_mAb_dt += k_ISF_AbFN_mAb_diss * ISF_AbFN1
-    d_ISF_AbF_dt += k_ISF_AbFN_mAb_diss * ISF_AbF1
-    d_ISF_AbF1_dt += -k_ISF_AbFN_mAb_diss * ISF_AbF1
+    rhs[idx['ISF_AbFN']] += p['k_ISF_AbFN_mAb_diss'] * ISF_AbFN1
+    rhs[idx['ISF_AbFN1']] += - p['k_ISF_AbFN_mAb_diss'] * ISF_AbFN1
+    rhs[idx['ISF_mAb']] += p['k_ISF_AbFN_mAb_diss'] * ISF_AbFN1
+    rhs[idx['ISF_AbF']] += p['k_ISF_AbFN_mAb_diss'] * ISF_AbF1
+    rhs[idx['ISF_AbF1']] += - p['k_ISF_AbFN_mAb_diss'] * ISF_AbF1
     # FN1->FN2
-    d_ISF_AbFN1_dt += -k_ISF_AbFN_mAb_bind * ISF_AbFN1 * ISF_mAb
-    d_ISF_AbFN2_dt += k_ISF_AbFN_mAb_bind * ISF_AbFN1 * ISF_mAb
-    d_ISF_mAb_dt += -k_ISF_AbFN_mAb_bind * ISF_AbFN1 * ISF_mAb
-    d_ISF_AbF1_dt += -k_ISF_AbFN_mAb_bind * ISF_AbF1 * ISF_mAb
-    d_ISF_AbF2_dt += k_ISF_AbFN_mAb_bind * ISF_AbF1 * ISF_mAb
+    rhs[idx['ISF_AbFN1']] += - p['k_ISF_AbFN_mAb_bind'] * ISF_AbFN1 * ISF_mAb
+    rhs[idx['ISF_AbFN2']] += p['k_ISF_AbFN_mAb_bind'] * ISF_AbFN1 * ISF_mAb
+    rhs[idx['ISF_mAb']] += - p['k_ISF_AbFN_mAb_bind'] * ISF_AbFN1 * ISF_mAb
+    rhs[idx['ISF_AbF1']] += - p['k_ISF_AbFN_mAb_bind'] * ISF_AbF1 * ISF_mAb
+    rhs[idx['ISF_AbF2']] += p['k_ISF_AbFN_mAb_bind'] * ISF_AbF1 * ISF_mAb
     # FN2->FN1
-    d_ISF_AbFN1_dt += 2 * k_ISF_AbFN_mAb_diss * ISF_AbFN2
-    d_ISF_AbFN2_dt += - 2 * k_ISF_AbFN_mAb_diss * ISF_AbFN2
-    d_ISF_mAb_dt += 2 * k_ISF_AbFN_mAb_diss * ISF_AbFN2
-    d_ISF_AbF1_dt += 2 * k_ISF_AbFN_mAb_diss * ISF_AbF2
-    d_ISF_AbF2_dt += - 2 * k_ISF_AbFN_mAb_diss * ISF_AbF2
+    rhs[idx['ISF_AbFN1']] += 2 * p['k_ISF_AbFN_mAb_diss'] * ISF_AbFN2
+    rhs[idx['ISF_AbFN2']] += - 2 * p['k_ISF_AbFN_mAb_diss'] * ISF_AbFN2
+    rhs[idx['ISF_mAb']] += 2 * p['k_ISF_AbFN_mAb_diss'] * ISF_AbFN2
+    rhs[idx['ISF_AbF1']] += 2 * p['k_ISF_AbFN_mAb_diss'] * ISF_AbF2
+    rhs[idx['ISF_AbF2']] += - 2 * p['k_ISF_AbFN_mAb_diss'] * ISF_AbF2
     
     
     # Antibody 'production' in ISF, for testing
-    d_ISF_mAb_dt += k_ISF_mAb_syn
-    
-    
-    
-    rhs.append(d_ISF_AbM_dt)
-    rhs.append(d_ISF_AbON_dt)
-    rhs.append(d_ISF_AbFN_dt)
-    rhs.append(d_ISF_AbF_dt)
-    rhs.append(d_ISF_AbP_dt)
-    rhs.append(d_ISF_mAb_dt)
-    rhs.append(d_ISF_AbF_mAb_dt)
-    rhs.append(d_ISF_AbM_mAb_dt)
-    rhs.append(d_ISF_AbFN1_dt)
-    rhs.append(d_ISF_AbF1_dt)
-    rhs.append(d_ISF_AbFN2_dt)
-    rhs.append(d_ISF_AbF2_dt)
-    
-    rhs.append(d_PL_AbM_dt)
-    rhs.append(d_PL_mAb_dt)
-    rhs.append(d_PL_AbM_mAb_dt)
-    
-    rhs.append(d_CSF_AbM_dt)
-    rhs.append(d_CSF_mAb_dt)
-    rhs.append(d_CSF_AbM_mAb_dt)
-    
-    rhs.append(d_PE_mAb_dt)
+    rhs[idx['ISF_mAb']] += p['k_ISF_mAb_syn']
     
     return rhs
+
 
 
 ###################################################################################
@@ -334,95 +423,22 @@ def set_basal_parameter_values():
     # AbF_mAb: Abeta fibril bound by antibody (strictly speaking, the refers to Abeta monomers in fibrils that bound by antibodies, used when simulating the effect of fibril surface binding)
     # AbFN1: Abeta fibril with one end bound by an antibody
     # AbFN2: Abeta fibril with both ends bound by antibodies
-    
-    
-    # Commonly used constants
-    global m0, t0, week_to_hour, year_to_week
-    global V_PL, MW_aducanumab, W_normal
-    
-    # Abeta production, aggregation
-    global k_ISF_AbM_syn # Abeta monomer production rate
-    global n_ISF_AbO_1stNuc, k_ISF_AbO_1stNuc # Primary nucleation order and rate
-    global n_ISF_AbO # Number of monomers in an oligomer
-    global k_ISF_AbO_diss # Oligmer dissociation rate
-    global n_ISF_AbF_conv, k_ISF_AbF_conv # Conversion order and rate from oligomer to fibril
-    global k_ISF_AbF_on # Monomer attachment rate to fibril ends
-    global n_ISF_AbO_2ndNuc, k_ISF_AbO_2ndNuc # Secondary nucleation order and rate
-    global k_ISF_AbP_conv, k_ISF_AbP_diss # Conversion rate from fibril to plaque, monomer dissociation rate from plaques
-    
-    # Clearance
-    # ISF
-    global k_ISF_AbM_clear, k_ISF_AbF_clear, k_ISF_AbP_clear # naming pattern: k_compartment_species_clear
-    global k_ISF_mAb_clear
-    global k_ISF_AbF_mAb_clear
-    global k_ISF_AbM_mAb_clear 
-    global k_ISF_AbFN1_clear 
-    global k_ISF_AbF1_clear 
-    global k_ISF_AbFN2_clear
-    global k_ISF_AbF2_clear
-    # PL
-    global k_PL_AbM_clear
-    global k_PL_mAb_clear
-    global k_PL_AbM_mAb_clear
-    
-    
-    # Transportation
-    # Monomer transportation
-    global k_ISF_CSF_AbM_tran 
-    global k_ISF_PL_AbM_tran 
-    global k_PL_ISF_AbM_tran
-    global k_CSF_PL_AbM_tran
-    global k_PL_CSF_AbM_tran
-   
-    # Antibody transportation
-    global k_ISF_PL_mAb_tran
-    global k_PL_ISF_mAb_tran
-    global k_ISF_CSF_mAb_tran
-    global k_CSF_PL_mAb_tran
-    global k_PL_CSF_mAb_tran
-    global k_PL_PE_mAb_tran
-    global k_PE_PL_mAb_tran
-    
-    # AbM_mAb transportation rates
-    global k_ISF_PL_AbM_mAb_tran
-    global k_PL_ISF_AbM_mAb_tran
-    global k_ISF_CSF_AbM_mAb_tran
-    global k_CSF_PL_AbM_mAb_tran
-    global k_PL_CSF_AbM_mAb_tran
-    
-    
-    # Fibril surface-antibody binding unbinding
-    global k_ISF_AbF_mAb_bind
-    global k_ISF_AbF_mAb_diss
-    # Monomer-antibody binding unbinding
-    global k_ISF_AbM_mAb_bind
-    global k_ISF_AbM_mAb_diss
-    global k_CSF_AbM_mAb_bind
-    global k_CSF_AbM_mAb_diss
-    global k_PL_AbM_mAb_bind
-    global k_PL_AbM_mAb_diss
-    # Fibril end-antibody binding unbinding
-    global k_ISF_AbFN_mAb_bind
-    global k_ISF_AbFN_mAb_diss
 
-        
-    # antibody 'production' rate
-    global k_ISF_mAb_syn
     
-    
+    pars = {}
     
     # Commonly used constants
-    m0 = 1e-9
-    t0 = 3600
-    week_to_hour = 7*24
-    year_to_week = 52
+    pars['m0'] = 1e-9; m0 = pars['m0'] # set the variable m0 for notational convenience
+    pars['t0'] = 3600; t0 = pars['t0'] # set the variable t0 for notational convenience
+    pars['week_to_hour'] = 7*24
+    pars['year_to_week'] = 52
 
     # Plasma volume
-    V_PL = 3
+    pars['V_PL'] = 3
     # Aducanumab molecular weight (g/mol)
-    MW_aducanumab = 1.5e5
+    pars['MW_aducanumab'] = 1.5e5
     # A normal person's weight (kg)
-    W_normal = 65
+    pars['W_normal'] = 65
 
     # Parameter values (adjusted)
     # All concentrations' unit is nM
@@ -430,24 +446,34 @@ def set_basal_parameter_values():
     
     # Abeta production, aggregation
     #k_ISF_AbM_syn = 1.2 # Raskatov2019
-    k_ISF_AbM_syn = 7 # Estimated
-    #k_ISF_AbM_syn = 8 # Testing
-
-    n_ISF_AbO_1stNuc = 0.8
-    k_ISF_AbO_1stNuc = 6.7e-8
-    k_ISF_AbO_1stNuc = t0 * k_ISF_AbO_1stNuc * (m0**(n_ISF_AbO_1stNuc - 1))
-    n_ISF_AbO = 2
-    k_ISF_AbO_diss = 9.7e-5 * t0
-    n_ISF_AbF_conv = 2.7
+    pars['k_ISF_AbM_syn'] = 7
+    pars['n_ISF_AbO_1stNuc'] = 0.8
+    
+    k_ISF_AbO_1stNuc = 6.7e-8 
+    k_ISF_AbO_1stNuc = t0 * k_ISF_AbO_1stNuc * (m0**(pars['n_ISF_AbO_1stNuc'] - 1))
+    pars['k_ISF_AbO_1stNuc'] = k_ISF_AbO_1stNuc
+    
+    pars['n_ISF_AbO'] = 2
+    pars['k_ISF_AbO_diss'] = 9.7e-5 * t0
+    pars['n_ISF_AbF_conv'] = 2.7
+    
     k_ISF_AbF_conv = 1.9e9
-    k_ISF_AbF_conv = t0 * k_ISF_AbF_conv * (m0**n_ISF_AbF_conv)
+    k_ISF_AbF_conv = t0 * k_ISF_AbF_conv * (m0**pars['n_ISF_AbF_conv'])
+    pars['k_ISF_AbF_conv'] = k_ISF_AbF_conv
+    
     k_ISF_AbF_on = 3e6
     k_ISF_AbF_on = t0 * k_ISF_AbF_on * m0
-    n_ISF_AbO_2ndNuc = 0.9
+    pars['k_ISF_AbF_on'] = k_ISF_AbF_on
+    
+    pars['n_ISF_AbO_2ndNuc'] = 0.9
+    
     k_ISF_AbO_2ndNuc = 2
-    k_ISF_AbO_2ndNuc = t0 * k_ISF_AbO_2ndNuc * (m0**n_ISF_AbO_2ndNuc)
-    k_ISF_AbP_conv = 7e-8 * t0 # Lin2022 AbO->AbP conversion rate
-    k_ISF_AbP_diss = 7e-11 * t0 # Lin2022 AbP->AbO conversion rate
+    k_ISF_AbO_2ndNuc = t0 * k_ISF_AbO_2ndNuc * (m0**pars['n_ISF_AbO_2ndNuc'])
+    pars['k_ISF_AbO_2ndNuc'] = k_ISF_AbO_2ndNuc
+    
+    pars['k_ISF_AbP_conv'] = 7e-8 * t0 # Lin2022 AbO->AbP conversion rate
+    pars['k_ISF_AbP_diss'] = 7e-11 * t0 # Lin2022 AbP->AbO conversion rate
+   
     
     
     # Clearace
@@ -455,56 +481,59 @@ def set_basal_parameter_values():
     #k_ISF_AbM_clear = 1.93e-5 * t0 # Lin2022
     #k_ISF_AbF_clear = 2.2e-8 * t0 # Lin2022
     #k_ISF_AbP_clear = 4.41e-9 * t0 # Lin2022
-    k_ISF_AbM_clear = 1e-1 # Adjusted
-    k_ISF_AbF_clear = 1e-3 # Adjusted
-    #k_ISF_AbP_clear = 1e-4 # Adjusted
-    k_ISF_AbP_clear = 1.5e-4 # Adjusted again
-    k_ISF_mAb_clear = 0 # No such clearance in Lin or Madrasi, set to zero
+    pars['k_ISF_AbM_clear'] = 1e-1 # Adjusted
+    pars['k_ISF_AbF_clear'] = 1e-3 # Adjusted
+    pars['k_ISF_AbP_clear'] =1.5e-4
+    pars['k_ISF_mAb_clear'] =0
+    
     #k_ISF_AbF_mAb_clear = 2.2e-8 * t0 # Assume to be the same as AbF degradation rate as in Lin2022
     #k_ISF_AbF_mAb_clear = 4e-2 # Assumed to be higher than AbF clearance rate in ISF
     #k_ISF_AbM_mAb_clear = 4e-2 # Assumed to be higher than AbF clearance rate in ISF
-    k_ISF_AbF_mAb_clear = 1e-3 # To match aducanumab data, this should be 4e-2
-    k_ISF_AbM_mAb_clear = 1e-3
-    k_ISF_AbFN1_clear = 1e-3
-    k_ISF_AbF1_clear = 1e-3
-    k_ISF_AbFN2_clear = 1e-3
-    k_ISF_AbF2_clear = 1e-3
+    pars['k_ISF_AbF_mAb_clear'] = 1e-3 # To match aducanumab data, this should be 4e-2
+    pars['k_ISF_AbM_mAb_clear'] = 1e-3
+    pars['k_ISF_AbFN1_clear'] = 1e-3
+    pars['k_ISF_AbF1_clear'] = 1e-3
+    pars['k_ISF_AbFN2_clear'] = 1e-3
+    pars['k_ISF_AbF2_clear'] = 1e-3
 
     # PL
-    k_PL_AbM_clear = 9.63e-5 * t0 # Lin2022
-    k_PL_mAb_clear = 1.38099820e-05 * t0 # Fitted
-    k_PL_AbM_mAb_clear = 1.38099820e-05 * t0 # Fitted; higher than Lin2022 (1.46e-6)
+    pars['k_PL_AbM_clear'] = 9.63e-5 * t0 # Lin2022
+    pars['k_PL_mAb_clear'] = 1.38099820e-05 * t0 # Fitted
+    pars['k_PL_AbM_mAb_clear'] = 1.38099820e-05 * t0 # Fitted; higher than Lin2022 (1.46e-6)
     
     
     
     # Transportation
     # Monomer
-    k_ISF_CSF_AbM_tran = 1.55e-5 * t0 # Lin2022
-    k_ISF_PL_AbM_tran = 1.48e-5 * t0 # Lin2022     ????????
-    k_PL_ISF_AbM_tran = 1.48e-4 * t0 # Lin2022    ???????
-    k_CSF_PL_AbM_tran = 4.17e-5 * t0 # Lin2022   
-    k_PL_CSF_AbM_tran = 1.72e-9 * t0 # Lin2022
+    pars['k_ISF_CSF_AbM_tran'] = 1.55e-5 * t0 # Lin2022
+    pars['k_ISF_PL_AbM_tran'] = 1.48e-5 * t0 # Lin2022     ????????
+    pars['k_PL_ISF_AbM_tran'] = 1.48e-4 * t0 # Lin2022    ???????
+    pars['k_CSF_PL_AbM_tran'] = 4.17e-5 * t0 # Lin2022   
+    pars['k_PL_CSF_AbM_tran'] = 1.72e-9 * t0 # Lin2022
+   
     
     # Antibody
     #k_ISF_PL_mAb_tran = 3e-3 * t0  # Lin2022
-    k_ISF_PL_mAb_tran = 3e-5 * t0  # Testing
+    pars['k_ISF_PL_mAb_tran'] = 3e-5 * t0  # Testing   
     #k_PL_ISF_mAb_tran = 1.6e-6 * t0 # Lin2022
-    k_PL_ISF_mAb_tran = 2e-6 * t0 # Testing
-    k_ISF_CSF_mAb_tran = 1.55e-5 * t0 # Lin2022
-    k_CSF_PL_mAb_tran = 4.17e-5 * t0 # Lin2022
-    k_PL_CSF_mAb_tran = 1.72e-9 * t0 # Lin2022
+    pars['k_PL_ISF_mAb_tran'] = 2e-6 * t0 # Testing    
+    pars['k_ISF_CSF_mAb_tran'] = 1.55e-5 * t0 # Lin2022   
+    pars['k_CSF_PL_mAb_tran'] = 4.17e-5 * t0 # Lin2022
+    pars['k_PL_CSF_mAb_tran'] = 1.72e-9 * t0 # Lin2022   
     #k_PL_PE_mAb_tran = 2.5e-6 * t0 # Lin2022
     #k_PE_PL_mAb_tran = 1e-6 * t0 # Lin2022
     #k_PL_mAb_clear = 1.46e-6 * t0 # Lin2022
-    k_PL_PE_mAb_tran = 1.81946225e-04 * t0 # Fitted
-    k_PE_PL_mAb_tran = 8.56369151e-06 * t0 # Fitted
+    pars['k_PL_PE_mAb_tran'] = 1.81946225e-04 * t0 # Fitted
+    pars['k_PE_PL_mAb_tran'] = 8.56369151e-06 * t0 # Fitted
+    
     
     # Monomer-antibody
-    k_ISF_PL_AbM_mAb_tran = 3e-5 * t0  # Testing; Lin2022's value is 3e-3 * t0, too high
-    k_PL_ISF_AbM_mAb_tran = 2e-6 * t0 # Testing; Lin2022's value is 1.6e-6 * t0, slightly less
-    k_ISF_CSF_AbM_mAb_tran = 1.55e-5 * t0 # Lin2022
-    k_CSF_PL_AbM_mAb_tran = 4.17e-5 * t0 # Lin2022  
-    k_PL_CSF_AbM_mAb_tran = 1.72e-9 * t0 # Lin2022  
+    pars['k_ISF_PL_AbM_mAb_tran'] = 3e-5 * t0  # Testing; Lin2022's value is 3e-3 * t0, too high
+    pars['k_PL_ISF_AbM_mAb_tran'] = 2e-6 * t0 # Testing; Lin2022's value is 1.6e-6 * t0, slightly less
+    pars['k_ISF_CSF_AbM_mAb_tran'] = 1.55e-5 * t0 # Lin2022
+    pars['k_CSF_PL_AbM_mAb_tran'] = 4.17e-5 * t0 # Lin2022  
+    pars['k_PL_CSF_AbM_mAb_tran'] = 1.72e-9 * t0 # Lin2022  
+   
     
     
     # Binding and unbinding
@@ -512,209 +541,36 @@ def set_basal_parameter_values():
     # Fibril surface-antibody
     # Estimation: KD = 1nM
     # Estimation binding rate: 1e-3/(nM*s)
-    #k_ISF_AbF_mAb_bind = 1e-3 * t0
-    k_ISF_AbF_mAb_bind = 2e-2 * t0 # This fits adu data better than 1e-3 * t0
-    k_ISF_AbF_mAb_diss = 1e-3 * t0
+    #k_ISF_AbF_mAb_bind = 2e-2 * t0 # This fits adu data better than 1e-3 * t0
+    pars['k_ISF_AbF_mAb_bind'] = 1e-3 * t0
+    pars['k_ISF_AbF_mAb_diss'] = 1e-3 * t0
 
     # Monomer-antibody 
-    k_ISF_AbM_mAb_bind = 1e-3 * t0
-    k_ISF_AbM_mAb_diss = 1e-3 * t0
-    k_CSF_AbM_mAb_bind = 1e-3 * t0
-    k_CSF_AbM_mAb_diss = 1e-3 * t0
-    k_PL_AbM_mAb_bind = 1e-3 * t0
-    k_PL_AbM_mAb_diss = 1e-3 * t0
+    pars['k_ISF_AbM_mAb_bind'] = 1e-3 * t0
+    pars['k_ISF_AbM_mAb_diss'] = 1e-3 * t0
+    pars['k_CSF_AbM_mAb_bind'] = 1e-3 * t0
+    pars['k_CSF_AbM_mAb_diss'] = 1e-3 * t0
+    pars['k_PL_AbM_mAb_bind'] = 1e-3 * t0
+    pars['k_PL_AbM_mAb_diss'] = 1e-3 * t0
+    
 
     # Fibril end-antibody 
-    k_ISF_AbFN_mAb_bind = 1e-3 * t0
-    k_ISF_AbFN_mAb_diss = 1e-3 * t0
+    pars['k_ISF_AbFN_mAb_bind'] = 1e-3 * t0
+    pars['k_ISF_AbFN_mAb_diss'] = 1e-3 * t0
     
     # ISF antibody 'production' rate
-    k_ISF_mAb_syn = 0
+    pars['k_ISF_mAb_syn'] = 0
     
+    return pars
+
     
 ###################################################################################
 def set_zero_initial_conditions():
-    # This function set zero for all species
-    y0 = []
-
-    # ISF
-    ISF_AbM = 0; y0.append(ISF_AbM)
-    ISF_AbON = 0; y0.append(ISF_AbON);
-    ISF_AbFN = 0; y0.append(ISF_AbFN)
-    ISF_AbF = 0; y0.append(ISF_AbF)
-    ISF_AbP = 0; y0.append(ISF_AbP)
-    ISF_mAb = 0; y0.append(ISF_mAb)
-    ISF_AbF_mAb = 0; y0.append(ISF_AbF_mAb)
-    ISF_AbM_mAb = 0; y0.append(ISF_AbM_mAb)
-    ISF_AbFN1 = 0; y0.append(ISF_AbFN1)
-    ISF_AbF1 = 0; y0.append(ISF_AbF1)
-    ISF_AbFN2 = 0; y0.append(ISF_AbFN2)
-    ISF_AbF2 = 0; y0.append(ISF_AbF2)
-
-
-    # PL
-    PL_AbM = 0; y0.append(PL_AbM)
-    PL_mAb = 0; y0.append(PL_mAb)
-    PL_AbM_mAb = 0; y0.append(PL_AbM_mAb)
-
-
-    # CSF
-    CSF_AbM = 0; y0.append(CSF_AbM)
-    CSF_mAb = 0; y0.append(CSF_mAb)
-    CSF_AbM_mAb = 0; y0.append(CSF_AbM_mAb)
-
-    # PE
-    PE_mAb = 0; y0.append(PE_mAb)
-    
-    return y0
+    return np.zeros(num_species)
 
 ###################################################################################
 def set_equilibrium_initial_conditions(sol):
-    # This function extracts the values from the solution object 'sol'
-    # 'sol' is obtained by simulating abeta evolution without antibody
-    # Thus, the simulation must be performed before this function is called.
-    global ISF_AbM_init 
-    global ISF_AbON_init 
-    global ISF_AbFN_init 
-    global ISF_AbF_init 
-    global ISF_AbP_init 
-    global ISF_mAb_init 
-    global ISF_AbF_mAb_init 
-    global ISF_AbM_mAb_init 
-    global ISF_AbFN1_init
-    global ISF_AbF1_init 
-    global ISF_AbFN2_init
-    global ISF_AbF2_init 
-
-
-    global PL_AbM_init
-    global PL_mAb_init
-    global PL_AbM_mAb_init
-
-
-    global CSF_AbM_init
-    global CSF_mAb_init
-    global CSF_AbM_mAb_init
-
-    global PE_mAb_init
-    
-    index = 0
-
-    ISF_AbM_init = sol.y[index][-1]; index += 1
-    ISF_AbON_init = sol.y[index][-1]; index += 1
-    ISF_AbFN_init = sol.y[index][-1]; index += 1
-    ISF_AbF_init = sol.y[index][-1]; index += 1
-    ISF_AbP_init = sol.y[index][-1]; index += 1
-    ISF_mAb_init = sol.y[index][-1]; index += 1
-    ISF_AbF_mAb_init = sol.y[index][-1]; index += 1
-    ISF_AbM_mAb_init = sol.y[index][-1]; index += 1
-    ISF_AbFN1_init = sol.y[index][-1]; index += 1
-    ISF_AbF1_init = sol.y[index][-1]; index += 1
-    ISF_AbFN2_init = sol.y[index][-1]; index += 1
-    ISF_AbF2_init = sol.y[index][-1]; index += 1
-
-
-    PL_AbM_init = sol.y[index][-1]; index += 1
-    PL_mAb_init = sol.y[index][-1]; index += 1
-    PL_AbM_mAb_init = sol.y[index][-1]; index += 1
-
-
-    CSF_AbM_init = sol.y[index][-1]; index += 1
-    CSF_mAb_init = sol.y[index][-1]; index += 1
-    CSF_AbM_mAb_init = sol.y[index][-1]; index += 1
-
-    PE_mAb_init = sol.y[index][-1]; index += 1
-    
-    
-    y0 = []
-
-    # ISF
-    y0.append(ISF_AbM_init)
-    y0.append(ISF_AbON_init);
-    y0.append(ISF_AbFN_init)
-    y0.append(ISF_AbF_init)
-    y0.append(ISF_AbP_init)
-    y0.append(ISF_mAb_init)
-    y0.append(ISF_AbF_mAb_init)
-    y0.append(ISF_AbM_mAb_init)
-    y0.append(ISF_AbFN1_init)
-    y0.append(ISF_AbF1_init)
-    y0.append(ISF_AbFN2_init)
-    y0.append(ISF_AbF2_init)
-
-
-    # PL
-    y0.append(PL_AbM_init)
-    y0.append(PL_mAb_init)
-    y0.append(PL_AbM_mAb_init)
-
-
-    # CSF
-    y0.append(CSF_AbM_init)
-    y0.append(CSF_mAb_init)
-    y0.append(CSF_AbM_mAb_init)
-
-    # PE
-    y0.append(PE_mAb_init)
-    
-    return y0
-    
-############################################################################################
-def get_hist(sol):
-    # Get the time evolution for each species as well as all the time points.
-    global t_hist
-    
-
-    global ISF_AbM_hist
-    global ISF_AbON_hist
-    global ISF_AbFN_hist
-    global ISF_AbF_hist
-    global ISF_AbP_hist
-    global ISF_mAb_hist
-    global ISF_AbF_mAb_hist
-    global ISF_AbM_mAb_hist
-    global ISF_AbFN1_hist
-    global ISF_AbF1_hist
-    global ISF_AbFN2_hist
-    global ISF_AbF2_hist
-
-    global PL_AbM_hist
-    global PL_mAb_hist
-    global PL_AbM_mAb_hist
-
-    global CSF_AbM_hist
-    global CSF_mAb_hist
-    global CSF_AbM_mAb_hist
-
-    global PE_mAb_hist
-    
-    t_hist = sol.t
-    
-    index = 0
-
-    ISF_AbM_hist = sol.y[index]; index += 1
-    ISF_AbON_hist = sol.y[index]; index += 1
-    ISF_AbFN_hist = sol.y[index]; index += 1
-    ISF_AbF_hist = sol.y[index]; index += 1
-    ISF_AbP_hist = sol.y[index]; index += 1
-    ISF_mAb_hist = sol.y[index]; index += 1
-    ISF_AbF_mAb_hist = sol.y[index]; index += 1
-    ISF_AbM_mAb_hist = sol.y[index]; index += 1
-    ISF_AbFN1_hist = sol.y[index]; index += 1
-    ISF_AbF1_hist = sol.y[index]; index += 1
-    ISF_AbFN2_hist = sol.y[index]; index += 1
-    ISF_AbF2_hist = sol.y[index]; index += 1
-
-    PL_AbM_hist = sol.y[index]; index += 1
-    PL_mAb_hist = sol.y[index]; index += 1
-    PL_AbM_mAb_hist = sol.y[index]; index += 1
-
-    CSF_AbM_hist = sol.y[index]; index += 1
-    CSF_mAb_hist = sol.y[index]; index += 1
-    CSF_AbM_mAb_hist = sol.y[index]; index += 1
-
-    PE_mAb_hist = sol.y[index]; index += 1
-    
+    return sol.y[:, -1]    
     
 #####################################################################################
 def set_basal_parameter_values_Michaels(basal_concentration):
@@ -723,492 +579,231 @@ def set_basal_parameter_values_Michaels(basal_concentration):
     # Thus, the result reflects the evolution of abeta species in ISF with a given initial
     # ...AbM, which is exactly Michaels2020's experiment. 
     
-    # Commonly used constants
-    global m0, t0, week_to_hour, year_to_week
-    global V_PL, MW_aducanumab, W_normal
-    
-    # Abeta production, aggregation
-    global k_ISF_AbM_syn
-    global n_ISF_AbO_1stNuc, k_ISF_AbO_1stNuc
-    global n_ISF_AbO
-    global k_ISF_AbO_diss
-    global n_ISF_AbF_conv, k_ISF_AbF_conv
-    global k_ISF_AbF_on
-    global n_ISF_AbO_2ndNuc, k_ISF_AbO_2ndNuc
-    global k_ISF_AbP_conv, k_ISF_AbP_diss
-    
-    # Clearance
-    # ISF
-    global k_ISF_AbM_clear, k_ISF_AbF_clear, k_ISF_AbP_clear 
-    global k_ISF_mAb_clear
-    global k_ISF_AbF_mAb_clear
-    global k_ISF_AbM_mAb_clear 
-    global k_ISF_AbFN1_clear 
-    global k_ISF_AbF1_clear 
-    global k_ISF_AbFN2_clear
-    global k_ISF_AbF2_clear
-    # PL
-    global k_PL_AbM_clear
-    global k_PL_mAb_clear
-    global k_PL_AbM_mAb_clear
-    
-    
-    # Transportation
-    # Monomer transportation
-    global k_ISF_CSF_AbM_tran 
-    global k_ISF_PL_AbM_tran 
-    global k_PL_ISF_AbM_tran
-    global k_CSF_PL_AbM_tran
-    global k_PL_CSF_AbM_tran
-   
-    # Antibody transportation
-    global k_ISF_PL_mAb_tran
-    global k_PL_ISF_mAb_tran
-    global k_ISF_CSF_mAb_tran
-    global k_CSF_PL_mAb_tran
-    global k_PL_CSF_mAb_tran
-    global k_PL_PE_mAb_tran
-    global k_PE_PL_mAb_tran
-    
-    # AbM_mAb transportation rates
-    global k_ISF_PL_AbM_mAb_tran
-    global k_PL_ISF_AbM_mAb_tran
-    global k_ISF_CSF_AbM_mAb_tran
-    global k_CSF_PL_AbM_mAb_tran
-    global k_PL_CSF_AbM_mAb_tran
-    
-    
-    # Fibril surface-antibody binding unbinding
-    global k_ISF_AbF_mAb_bind
-    global k_ISF_AbF_mAb_diss
-    # Monomer-antibody binding unbinding
-    global k_ISF_AbM_mAb_bind
-    global k_ISF_AbM_mAb_diss
-    global k_CSF_AbM_mAb_bind
-    global k_CSF_AbM_mAb_diss
-    global k_PL_AbM_mAb_bind
-    global k_PL_AbM_mAb_diss
-    # Fibril end-antibody binding unbinding
-    global k_ISF_AbFN_mAb_bind
-    global k_ISF_AbFN_mAb_diss
-
-        
-    # antibody 'production' rate
-    global k_ISF_mAb_syn
-    
-    
-    
-    # Commonly used constants
-    m0 = basal_concentration # Note that the rescaling concentration is different from ours (1e-9)
-    t0 = 3600
-    week_to_hour = 7*24
-    year_to_week = 52
-
-    # Plasma volume
-    V_PL = 3
-    # Aducanumab molecular weight (g/mol)
-    MW_aducanumab = 1.5e5
-    # A normal person's weight (kg)
-    W_normal = 65
-
-    # Parameter values (adjusted)
-    # All concentrations' unit is nM
-    # Time's unit is hour
-    
-    # Abeta production, aggregation
-    #k_ISF_AbM_syn = 1.2 # Raskatov2019
-    k_ISF_AbM_syn = 0
-
-    n_ISF_AbO_1stNuc = 0.8
-    k_ISF_AbO_1stNuc = 6.7e-8
-    k_ISF_AbO_1stNuc = t0 * k_ISF_AbO_1stNuc * (m0**(n_ISF_AbO_1stNuc - 1))
-    n_ISF_AbO = 2
-    k_ISF_AbO_diss = 9.7e-5 * t0
-    n_ISF_AbF_conv = 2.7
-    k_ISF_AbF_conv = 1.9e9
-    k_ISF_AbF_conv = t0 * k_ISF_AbF_conv * (m0**n_ISF_AbF_conv)
-    k_ISF_AbF_on = 3e6
-    k_ISF_AbF_on = t0 * k_ISF_AbF_on * m0
-    n_ISF_AbO_2ndNuc = 0.9
-    k_ISF_AbO_2ndNuc = 2
-    k_ISF_AbO_2ndNuc = t0 * k_ISF_AbO_2ndNuc * (m0**n_ISF_AbO_2ndNuc)
-    k_ISF_AbP_conv = 0
-    k_ISF_AbP_diss = 0
+    set_basal_parameter_values()
+    parameters['m0'] = basal_concentration
+    parameters['k_ISF_AbP_conv'] = 0
+    parameters['k_ISF_AbP_diss'] = 0
     
     
     # Clearace
     # ISF
-    k_ISF_AbM_clear = 0
-    k_ISF_AbF_clear = 0
-    k_ISF_AbP_clear = 0
-    k_ISF_mAb_clear = 0 
-    k_ISF_AbF_mAb_clear = 0
-    k_ISF_AbM_mAb_clear = 0
-    k_ISF_AbFN1_clear = 0
-    k_ISF_AbF1_clear = 0
-    k_ISF_AbFN2_clear = 0
-    k_ISF_AbF2_clear = 0
+    parameters['k_ISF_AbM_clear'] = 0
+    parameters['k_ISF_AbF_clear'] = 0
+    parameters['k_ISF_AbP_clear'] = 0
+    parameters['k_ISF_mAb_clear'] = 0
+    parameters['k_ISF_AbF_mAb_clear'] = 0
+    parameters['k_ISF_AbM_mAb_clear'] = 0
+    parameters['k_ISF_AbFN1_clear'] = 0
+    parameters['k_ISF_AbF1_clear'] = 0
+    parameters['k_ISF_AbFN2_clear'] = 0
+    parameters['k_ISF_AbF2_clear'] = 0
 
     # PL
-    k_PL_AbM_clear = 0
-    k_PL_mAb_clear = 0
-    k_PL_AbM_mAb_clear = 0
-    
-    
+    parameters['k_PL_AbM_clear'] = 0
+    parameters['k_PL_mAb_clear'] = 0
+    parameters['k_PL_AbM_mAb_clear'] = 0
+
     
     # Transportation
     # Monomer
-    k_ISF_CSF_AbM_tran = 0
-    k_ISF_PL_AbM_tran = 0
-    k_PL_ISF_AbM_tran = 0
-    k_CSF_PL_AbM_tran = 0
-    k_PL_CSF_AbM_tran = 0
+    parameters['k_ISF_CSF_AbM_tran'] = 0
+    parameters['k_ISF_PL_AbM_tran'] = 0 
+    parameters['k_PL_ISF_AbM_tran'] = 0  
+    parameters['k_CSF_PL_AbM_tran'] = 0  
+    parameters['k_PL_CSF_AbM_tran'] = 0
+  
     
     # Antibody
-    k_ISF_PL_mAb_tran = 0
-    k_PL_ISF_mAb_tran = 0
-    k_ISF_CSF_mAb_tran = 0
-    k_CSF_PL_mAb_tran = 0
-    k_PL_CSF_mAb_tran = 0
-    k_PL_PE_mAb_tran = 0
-    k_PE_PL_mAb_tran = 0
+    parameters['k_ISF_PL_mAb_tran'] = 0  
+    parameters['k_PL_ISF_mAb_tran'] = 0
+    parameters['k_ISF_CSF_mAb_tran'] = 0 
+    parameters['k_CSF_PL_mAb_tran'] = 0 
+    parameters['k_PL_CSF_mAb_tran'] = 0 
+    parameters['k_PL_PE_mAb_tran'] = 0  
+    parameters['k_PE_PL_mAb_tran'] = 0
+ 
     
     # Monomer-antibody
-    k_ISF_PL_AbM_mAb_tran = 0
-    k_PL_ISF_AbM_mAb_tran = 0
-    k_ISF_CSF_AbM_mAb_tran = 0
-    k_CSF_PL_AbM_mAb_tran = 0
-    k_PL_CSF_AbM_mAb_tran = 0
-    
+    parameters['k_ISF_PL_AbM_mAb_tran'] = 0 
+    parameters['k_PL_ISF_AbM_mAb_tran'] = 0 
+    parameters['k_ISF_CSF_AbM_mAb_tran'] = 0 
+    parameters['k_CSF_PL_AbM_mAb_tran'] = 0  
+    parameters['k_PL_CSF_AbM_mAb_tran'] = 0
     
     # Binding and unbinding
-    k_ISF_AbF_mAb_bind = 0
-    k_ISF_AbF_mAb_diss = 0
+    parameters['k_ISF_AbF_mAb_bind'] = 0 
+    parameters['k_ISF_AbF_mAb_diss'] = 0
+  
 
     # Monomer-antibody 
-    k_ISF_AbM_mAb_bind = 0
-    k_ISF_AbM_mAb_diss = 0
-    k_CSF_AbM_mAb_bind = 0
-    k_CSF_AbM_mAb_diss = 0
-    k_PL_AbM_mAb_bind = 0
-    k_PL_AbM_mAb_diss = 0
+    parameters['k_ISF_AbM_mAb_bind'] = 0 
+    parameters['k_ISF_AbM_mAb_diss'] = 0   
+    parameters['k_CSF_AbM_mAb_bind'] = 0    
+    parameters['k_CSF_AbM_mAb_diss'] = 0    
+    parameters['k_PL_AbM_mAb_bind'] = 0    
+    parameters['k_PL_AbM_mAb_diss'] = 0
 
     # Fibril end-antibody 
-    k_ISF_AbFN_mAb_bind = 0
-    k_ISF_AbFN_mAb_diss = 0
+    parameters['k_ISF_AbFN_mAb_bind'] = 0    
+    parameters['k_ISF_AbFN_mAb_diss'] = 0
     
     # ISF antibody 'production' rate
-    k_ISF_mAb_syn = 0
+    parameters['k_ISF_mAb_syn'] = 0
+    
     
     
 ###################################################################################
-def show_parameters():
-    # This function displays all parameters for diagnostic purpose.
-    # Commonly used constants
-    global m0, t0, week_to_hour, year_to_week
-    global V_PL, MW_aducanumab, W_normal
-    
-    # Abeta production, aggregation
-    global k_ISF_AbM_syn
-    global n_ISF_AbO_1stNuc, k_ISF_AbO_1stNuc
-    global n_ISF_AbO
-    global k_ISF_AbO_diss
-    global n_ISF_AbF_conv, k_ISF_AbF_conv
-    global k_ISF_AbF_on
-    global n_ISF_AbO_2ndNuc, k_ISF_AbO_2ndNuc
-    global k_ISF_AbP_conv, k_ISF_AbP_diss
-    
-    # Clearance
-    # ISF
-    global k_ISF_AbM_clear, k_ISF_AbF_clear, k_ISF_AbP_clear 
-    global k_ISF_mAb_clear
-    global k_ISF_AbF_mAb_clear
-    global k_ISF_AbM_mAb_clear 
-    global k_ISF_AbFN1_clear 
-    global k_ISF_AbF1_clear 
-    global k_ISF_AbFN2_clear
-    global k_ISF_AbF2_clear
-    # PL
-    global k_PL_AbM_clear
-    global k_PL_mAb_clear
-    global k_PL_AbM_mAb_clear
-    
-    
-    # Transportation
-    # Monomer transportation
-    global k_ISF_CSF_AbM_tran 
-    global k_ISF_PL_AbM_tran 
-    global k_PL_ISF_AbM_tran
-    global k_CSF_PL_AbM_tran
-    global k_PL_CSF_AbM_tran
-   
-    # Antibody transportation
-    global k_ISF_PL_mAb_tran
-    global k_PL_ISF_mAb_tran
-    global k_ISF_CSF_mAb_tran
-    global k_CSF_PL_mAb_tran
-    global k_PL_CSF_mAb_tran
-    global k_PL_PE_mAb_tran
-    global k_PE_PL_mAb_tran
-    
-    # AbM_mAb transportation rates
-    global k_ISF_PL_AbM_mAb_tran
-    global k_PL_ISF_AbM_mAb_tran
-    global k_ISF_CSF_AbM_mAb_tran
-    global k_CSF_PL_AbM_mAb_tran
-    global k_PL_CSF_AbM_mAb_tran
-    
-    
-    # Fibril surface-antibody binding unbinding
-    global k_ISF_AbF_mAb_bind
-    global k_ISF_AbF_mAb_diss
-    # Monomer-antibody binding unbinding
-    global k_ISF_AbM_mAb_bind
-    global k_ISF_AbM_mAb_diss
-    global k_CSF_AbM_mAb_bind
-    global k_CSF_AbM_mAb_diss
-    global k_PL_AbM_mAb_bind
-    global k_PL_AbM_mAb_diss
-    # Fibril end-antibody binding unbinding
-    global k_ISF_AbFN_mAb_bind
-    global k_ISF_AbFN_mAb_diss
 
+    
+
+
+
+################################################################
+################################################################
+################################################################
+################################################################
+################################################################
+
+# Functions for Aducanumab PK fitting
+
+def AduPKFitting_func_obj(pars, data):
+    # Object function for fitting aducanumab PK
+    parameters['k_PL_PE_mAb_tran'] = pars[0]
+    parameters['k_PE_PL_mAb_tran'] = pars[1]
+    parameters['k_PL_mAb_clear'] = pars[2]
+    
+    
+    # data: Aducanumab PK data in Lin2022Fig2a
+    time60, concentration60, time30, concentration30, time20, concentration20, time10, concentration10, time3, concentration3, time1, concentration1, time0p3, concentration0p3 = data
+    
+    
+    
+    
+    # Initialize the loss
+    L = 0
+    
+    dose = 60 * 1e-3
+    for t, c in zip(time60, concentration60):
+        # Prediction
+        c_pred = AduPKFitting_cal_c_pred(t, dose)
+        # Normalized squared difference
+        L += (c_pred-c)**2 / (c**2 + 1e-8)
         
-    # antibody 'production' rate
-    global k_ISF_mAb_syn
     
+    dose = 30 * 1e-3 # dose unit: g/kg, the original unit is mg/kg
+    for t, c in zip(time30, concentration30):
+        # Prediction
+        c_pred = AduPKFitting_cal_c_pred(t, dose)
+        # Normalized squared difference
+        L += (c_pred-c)**2 / (c**2 + 1e-8)
+        
+    dose = 20 * 1e-3
+    for t, c in zip(time20, concentration20):
+        # Prediction
+        c_pred = AduPKFitting_cal_c_pred(t, dose)
+        # Normalized squared difference
+        L += (c_pred-c)**2 / (c**2 + 1e-8)
+        
+    dose = 10 * 1e-3
+    for t, c in zip(time10, concentration10):
+        # Prediction
+        c_pred = AduPKFitting_cal_c_pred(t, dose)
+        # Normalized squared difference
+        L += (c_pred-c)**2 / (c**2 + 1e-8)
+        
+    dose = 3 * 1e-3
+    for t, c in zip(time3, concentration3):
+        # Prediction
+        c_pred = AduPKFitting_cal_c_pred(t, dose)
+        # Normalized squared difference
+        L += (c_pred-c)**2 / (c**2 + 1e-8)
     
+    dose = 1 * 1e-3
+    for t, c in zip(time1, concentration1):
+        # Prediction
+        c_pred = AduPKFitting_cal_c_pred(t, dose)
+        # Normalized squared difference
+        L += (c_pred-c)**2 / (c**2 + 1e-8)
+        
     
-    # Commonly used constants
-    print('m0', m0)
-    print('t0', t0)
-    print('week_to_hour', week_to_hour)
-    print('year_to_week', year_to_week)
-
-    # Plasma volume
-    print('V_PL', V_PL)
-    # Aducanumab molecular weight (g/mol)
-    print('MW_aducanumab', MW_aducanumab)
-    # A normal person's weight (kg)
-    print('W_normal', W_normal)
-
-    # Parameter values (adjusted)
-    # All concentrations' unit is nM
-    # Time's unit is hour
+    dose = 0.3 * 1e-3
+    for t, c in zip(time0p3, concentration0p3):
+        # Prediction
+        c_pred = AduPKFitting_cal_c_pred(t, dose)
+        # Normalized squared difference
+        L += (c_pred-c)**2 / (c**2 + 1e-8)
     
-    # Abeta production, aggregation
-    print("AbM production")
-    print('k_ISF_AbM_syn', k_ISF_AbM_syn)
-   
-    print("Ab aggregation")
-    print('n_ISF_AbO_1stNuc', n_ISF_AbO_1stNuc)
-    print('k_ISF_AbO_1stNuc', k_ISF_AbO_1stNuc)
-    print('n_ISF_AbO', n_ISF_AbO)
-    print('k_ISF_AbO_diss', k_ISF_AbO_diss)
-    print('n_ISF_AbF_conv', n_ISF_AbF_conv)
-    print('k_ISF_AbF_conv', k_ISF_AbF_conv)
-    print('k_ISF_AbF_on', k_ISF_AbF_on)
-    print('n_ISF_AbO_2ndNuc', n_ISF_AbO_2ndNuc)
-    print('k_ISF_AbO_2ndNuc', k_ISF_AbO_2ndNuc)
-    print('k_ISF_AbP_conv', k_ISF_AbP_conv)
-    print('k_ISF_AbP_diss', k_ISF_AbP_diss)
+    return L
+
+###########################################################
+def AduPKFitting_cal_c_pred(t, dose):
+    # Predict the PL mAb at t with dose
     
+    # The initial plasma mAb concentration due to intravenous dosing
+    # dose: g/kg
+    # W_normal: kg
+    # MW_aducanumab: g/mol
+    # V_PL: liter
+    # m0: 1e-9 mol, rescale the concentration to nm/liter
     
+    p = parameters
     
-    # Clearace
-    print("Clearance")
-    # ISF
-    print("ISF")
-    print('k_ISF_AbM_clear', k_ISF_AbM_clear)
-    print('k_ISF_AbF_clear', k_ISF_AbF_clear)
-    print('k_ISF_AbP_clear', k_ISF_AbP_clear)
-    print('k_ISF_mAb_clear', k_ISF_mAb_clear)
-    print('k_ISF_AbF_mAb_clear', k_ISF_AbF_mAb_clear)
-    print('k_ISF_AbM_mAb_clear', k_ISF_AbM_mAb_clear)
-    print('k_ISF_AbFN1_clear', k_ISF_AbFN1_clear)
-    print('k_ISF_AbF1_clear', k_ISF_AbF1_clear)
-    print('k_ISF_AbFN2_clear', k_ISF_AbFN2_clear)
-    print('k_ISF_AbF2_clear', k_ISF_AbF2_clear)
-
-    # PL
-    print("PL")
-    print('k_PL_AbM_clear', k_PL_AbM_clear)
-    print('k_PL_mAb_clear', k_PL_mAb_clear)
-    print('k_PL_AbM_mAb_clear', k_PL_AbM_mAb_clear)
+    PL_mAb_init = dose * p['W_normal']/p['MW_aducanumab']/p['V_PL']/p['m0']
     
+    # Initial condition
+    y0 = set_zero_initial_conditions_except_PL_mAb(PL_mAb_init)
     
+    # Solving the system up to time t
+    sol = solve_ivp(fun=RHS, t_span=[0, t], y0=y0, 
+                    method='LSODA', rtol=1e-3, max_step=1e2)
+    # Get the current PL_mAb value
+    c_pred = sol.y[indices_species['PL_mAb']][-1]
     
-    # Transportation
-    print("Transportation")
-    # Monomer
-    print("Monomer")
-    print('k_ISF_CSF_AbM_tran', k_ISF_CSF_AbM_tran)
-    print('k_ISF_PL_AbM_tran', k_ISF_PL_AbM_tran)
-    print('k_PL_ISF_AbM_tran', k_PL_ISF_AbM_tran)
-    print('k_CSF_PL_AbM_tran', k_CSF_PL_AbM_tran)
-    print('k_PL_CSF_AbM_tran', k_PL_CSF_AbM_tran)
-    
-    # Antibody
-    print("Antibody")
-    print('k_ISF_PL_mAb_tran', k_ISF_PL_mAb_tran)
-    print('k_PL_ISF_mAb_tran', k_PL_ISF_mAb_tran)
-    print('k_ISF_CSF_mAb_tran', k_ISF_CSF_mAb_tran)
-    print('k_CSF_PL_mAb_tran', k_CSF_PL_mAb_tran)
-    print('k_PL_CSF_mAb_tran', k_PL_CSF_mAb_tran)
-    print('k_PL_PE_mAb_tran', k_PL_PE_mAb_tran)
-    print('k_PE_PL_mAb_tran', k_PE_PL_mAb_tran)
-    
-    # Monomer-antibody
-    print("AbM-mAb")
-    print('k_ISF_PL_AbM_mAb_tran', k_ISF_PL_AbM_mAb_tran)
-    print('k_PL_ISF_AbM_mAb_tran', k_PL_ISF_AbM_mAb_tran)
-    print('k_ISF_CSF_AbM_mAb_tran', k_ISF_CSF_AbM_mAb_tran)
-    print('k_CSF_PL_AbM_mAb_tran', k_CSF_PL_AbM_mAb_tran)
-    print('k_PL_CSF_AbM_mAb_tran', k_PL_CSF_AbM_mAb_tran)
-    
-    
-    # Binding and unbinding
-    print("Binding")
-    
-    # Fibril surface-antibody
-    print("Fibril surface")
-    print('k_ISF_AbF_mAb_bind', k_ISF_AbF_mAb_bind)
-    print('k_ISF_AbF_mAb_diss', k_ISF_AbF_mAb_diss)
-
-    # Monomer-antibody 
-    print("Monomer")
-    print('k_ISF_AbM_mAb_bind', k_ISF_AbM_mAb_bind)
-    print('k_ISF_AbM_mAb_diss', k_ISF_AbM_mAb_diss)
-    print('k_CSF_AbM_mAb_bind', k_CSF_AbM_mAb_bind)
-    print('k_CSF_AbM_mAb_diss', k_CSF_AbM_mAb_diss)
-    print('k_PL_AbM_mAb_bind', k_PL_AbM_mAb_bind)
-    print('k_PL_AbM_mAb_diss', k_PL_AbM_mAb_diss)
-
-    # Fibril end-antibody 
-    print("Fibril end")
-    print('k_ISF_AbFN_mAb_bind', k_ISF_AbFN_mAb_bind)
-    print('k_ISF_AbFN_mAb_diss', k_ISF_AbFN_mAb_diss)
-    
-    # ISF antibody 'production' rate
-    print("Antibody production for testing")
-    print('k_ISF_mAb_syn', k_ISF_mAb_syn)
-    
-###############################################################################
-
-def show_currents():
-    # Show currents
-    print("ISF Ab Aggregation")
-    print("AbM production:", k_ISF_AbM_syn)
-    print("Primary nucleation (AbON):", k_ISF_AbO_1stNuc * (ISF_AbM_hist[-1]**n_ISF_AbO_1stNuc))
-    print("AbON dissociation:", k_ISF_AbO_diss * ISF_AbON_hist[-1])
-    print("Oligomer conversion into fibril:", 
-          k_ISF_AbF_conv * ISF_AbON_hist[-1] * (ISF_AbM_hist[-1]**n_ISF_AbF_conv))
-    print("Fibril elongation:", 
-          2 * k_ISF_AbF_on * ISF_AbM_hist[-1] * ISF_AbFN_hist[-1])
-    ISF_AbF_total = ISF_AbF_hist[-1] + ISF_AbF1_hist[-1] + ISF_AbF2_hist[-1]
-    print("Secondary nucleation:", 
-          k_ISF_AbO_2ndNuc * (ISF_AbM_hist[-1]**n_ISF_AbO_2ndNuc) * ISF_AbF_total)
-
-    print("ISF Clearance")
-    print("Monomer clearance:", k_ISF_AbM_clear * ISF_AbM_hist[-1])
-    print("Fibril clearance:", k_ISF_AbF_clear * ISF_AbF_hist[-1])
-    print("Antibody clearance:", k_ISF_mAb_clear * ISF_mAb_hist[-1])
-    print("AbM-mAb clearance:", k_ISF_AbM_mAb_clear * ISF_AbM_mAb_hist[-1])
-    print("AbF-mAb clearance:", k_ISF_AbF_mAb_clear * ISF_AbF_mAb_hist[-1])
-    print("Fibril end binding")
-    print("AbFN1-mAb clearance:", k_ISF_AbFN1_clear * ISF_AbFN1_hist[-1])
-    print("AbF1-mAb clearance:", k_ISF_AbF1_clear * ISF_AbF1_hist[-1])
-    print("AbFN2-mAb clearance:", k_ISF_AbFN2_clear * ISF_AbFN2_hist[-1])
-    print("AbF2-mAb clearance:", k_ISF_AbF2_clear * ISF_AbF2_hist[-1])
-    
-##################################################################################################
-def set_equilibrium_initial_conditions(sol):
-    # This should be run after simulating abeta evolution without antibody
-    global ISF_AbM_init 
-    global ISF_AbON_init 
-    global ISF_AbFN_init 
-    global ISF_AbF_init 
-    global ISF_AbP_init 
-    global ISF_mAb_init 
-    global ISF_AbF_mAb_init 
-    global ISF_AbM_mAb_init 
-    global ISF_AbFN1_init
-    global ISF_AbF1_init 
-    global ISF_AbFN2_init
-    global ISF_AbF2_init 
+    return c_pred
 
 
-    global PL_AbM_init
-    global PL_mAb_init
-    global PL_AbM_mAb_init
-
-
-    global CSF_AbM_init
-    global CSF_mAb_init
-    global CSF_AbM_mAb_init
-
-    global PE_mAb_init
-    
-    index = 0
-
-    ISF_AbM_init = sol.y[index][-1]; index += 1
-    ISF_AbON_init = sol.y[index][-1]; index += 1
-    ISF_AbFN_init = sol.y[index][-1]; index += 1
-    ISF_AbF_init = sol.y[index][-1]; index += 1
-    ISF_AbP_init = sol.y[index][-1]; index += 1
-    ISF_mAb_init = sol.y[index][-1]; index += 1
-    ISF_AbF_mAb_init = sol.y[index][-1]; index += 1
-    ISF_AbM_mAb_init = sol.y[index][-1]; index += 1
-    ISF_AbFN1_init = sol.y[index][-1]; index += 1
-    ISF_AbF1_init = sol.y[index][-1]; index += 1
-    ISF_AbFN2_init = sol.y[index][-1]; index += 1
-    ISF_AbF2_init = sol.y[index][-1]; index += 1
-
-
-    PL_AbM_init = sol.y[index][-1]; index += 1
-    PL_mAb_init = sol.y[index][-1]; index += 1
-    PL_AbM_mAb_init = sol.y[index][-1]; index += 1
-
-
-    CSF_AbM_init = sol.y[index][-1]; index += 1
-    CSF_mAb_init = sol.y[index][-1]; index += 1
-    CSF_AbM_mAb_init = sol.y[index][-1]; index += 1
-
-    PE_mAb_init = sol.y[index][-1]; index += 1
-    
-    
-    y0 = []
-
-    # ISF
-    y0.append(ISF_AbM_init)
-    y0.append(ISF_AbON_init);
-    y0.append(ISF_AbFN_init)
-    y0.append(ISF_AbF_init)
-    y0.append(ISF_AbP_init)
-    y0.append(ISF_mAb_init)
-    y0.append(ISF_AbF_mAb_init)
-    y0.append(ISF_AbM_mAb_init)
-    y0.append(ISF_AbFN1_init)
-    y0.append(ISF_AbF1_init)
-    y0.append(ISF_AbFN2_init)
-    y0.append(ISF_AbF2_init)
-
-
-    # PL
-    y0.append(PL_AbM_init)
-    y0.append(PL_mAb_init)
-    y0.append(PL_AbM_mAb_init)
-
-
-    # CSF
-    y0.append(CSF_AbM_init)
-    y0.append(CSF_mAb_init)
-    y0.append(CSF_AbM_mAb_init)
-
-    # PE
-    y0.append(PE_mAb_init)
+###################################################################################
+def set_zero_initial_conditions_except_PL_mAb(PL_mAb_init):
+    # This function set zero for all species, except PL_mAb
+    # This function is used for calculating PK given initial PL_mAb
+        
+    y0 = set_zero_initial_conditions()
+    y0[indices_species['PL_mAb']] = PL_mAb_init
     
     return y0
+
+
+#######################################################
+def AduPKFitting_turnoff_binding():
+    # Set all binding and dissociation rates to be zeros
+    # Used for solving PK 
+    
+    # Fibril surface-antibody binding unbinding
+    parameters['k_ISF_AbF_mAb_bind'] = 0
+    parameters['k_ISF_AbF_mAb_diss'] = 0
+    # Monomer-antibody binding unbinding
+    parameters['k_ISF_AbM_mAb_bind'] = 0
+    parameters['k_ISF_AbM_mAb_diss'] = 0
+    parameters['k_CSF_AbM_mAb_bind'] = 0
+    parameters['k_CSF_AbM_mAb_diss'] = 0
+    parameters['k_PL_AbM_mAb_bind'] = 0
+    parameters['k_PL_AbM_mAb_diss'] = 0
+    # Fibril end-antibody binding unbinding
+    parameters['k_ISF_AbFN_mAb_bind'] = 0
+    parameters['k_ISF_AbFN_mAb_diss'] = 0
+    
+    
+    
+    
+    
+indices_species, num_species = set_indices_species()
+indices_parameters = set_indices_parameters()
+parameters = set_basal_parameter_values()
+    
+    
+   
+
+    
     
     
     
